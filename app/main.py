@@ -11,6 +11,12 @@ from pydantic.error_wrappers import ErrorWrapper
 from starlette.requests import Request
 from todoist_api_python.api_async import TodoistAPIAsync
 
+logging_format = '%(asctime)s %(levelname)s:%(name)s %(filename)s:%(lineno)d %(funcName)s - %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=logging_format)
+
+import sys
+logging.debug(sys.path)
+
 import tasks
 import todoist
 import utils
@@ -23,7 +29,8 @@ if not ENV['TODOIST_API_KEY']:
 if not ENV['EXISTIO_API_KEY']:
     utils.error("EXISTIO_API_KEY should not be empty")
 
-logging_format = '%(asctime)s %(levelname)s:%(name)s %(filename)s:%(lineno)d %(funcName)s - %(message)s'
+
+
 if ENV['DEBUG']:
     logging.basicConfig(level=logging.DEBUG, format=logging_format)
 else:
@@ -79,8 +86,10 @@ async def todoist_webhook(
             or
             (webhook.event_name.startswith('item:') and webhook.initiator.id == webhook.event_data.user_id)
     )
-    logging.info('Todoist.webhook: event_name=%s, owner=%r, event_data=%r', webhook.event_name, owner,
-                 webhook.event_data)
+    
+    
+    logging.info('Todoist.webhook: event_name=%s, owner=%r', webhook.event_name, owner)
+    logging.info(f"webhook.event_data: {webhook.json(indent=4)}")
     if not owner:
         return 'Incorrect ownership, but I do not care'
     background_tasks.add_task(
