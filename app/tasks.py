@@ -1,3 +1,4 @@
+import urllib.parse
 from datetime import datetime, timedelta, date
 
 from todoist_api_python.api_async import TodoistAPIAsync
@@ -231,6 +232,20 @@ async def release_tag(
     await data_manager.remove(task_id)
     await existio_api.attributes_release([tag])
     await delete_relevant_comment(task_id, todoist_api)
+    
+    
+async def item_added(
+    task: Task,
+    data_manager: DataManager,
+    todoist_api: TodoistAPIAsync,
+    existio_api: ExistioAPI,
+):
+    action_name = "Get Todoist Comments"
+    action_param = urllib.parse.quote(action_name)
+    url = f"drafts://x-callback-url/runAction?text={task.id}&action={action_param}"
+    # drafts://x-callback-url/runAction?text=${uuidTodoistText}&action=${encodeURIComponent(actionName)}
+    await todoist_api.add_comment(f'[Get Comments]({url})', task_id=task.id)
+
 
 
 async def delete_relevant_comment(task_id: str, todoist_api: TodoistAPIAsync, include_exist_url=True):
@@ -252,4 +267,5 @@ EVEN_MAP = {
     'item:completed': task_completed,
     'item:uncompleted': task_uncompleted,
     'item:deleted': task_deleted,
+    'item:added': item_added,
 }
