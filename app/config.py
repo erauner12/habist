@@ -18,4 +18,4 @@ ENV = {
 for key in [
     'DEBUG',
 ]:
-    ENV[key] = utils.my_bool(ENV[key])
+    ENV[key] = utils.my_bool(ENV.get(key, False))
